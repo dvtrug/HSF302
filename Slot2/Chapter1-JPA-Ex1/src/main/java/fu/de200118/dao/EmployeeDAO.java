@@ -1,10 +1,9 @@
 package fu.de200118.dao;
 
 import fu.de200118.pojo.Employee;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.Persistence;
+import jakarta.persistence.*;
+
+import java.util.List;
 
 public class EmployeeDAO {
     private final EntityManagerFactory emf;
@@ -28,6 +27,30 @@ public class EmployeeDAO {
             ex.printStackTrace();
             throw ex;
         } finally {
+            if (em != null && em.isOpen()) {
+                em.close();
+            }
+        }
+    }
+
+    public Employee findByID(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Employee.class, id);
+        } finally {
+            if (em != null && em.isOpen()) {
+                em.close();
+            }
+        }
+    }
+
+    public List<Employee> findAll() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "select e from Employee e";
+            TypedQuery<Employee> query = em.createQuery(jpql, Employee.class);
+            return query.getResultList();
+        }  finally {
             if (em != null && em.isOpen()) {
                 em.close();
             }
