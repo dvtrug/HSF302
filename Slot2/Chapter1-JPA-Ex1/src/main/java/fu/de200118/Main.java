@@ -2,59 +2,38 @@ package fu.de200118;
 
 import fu.de200118.dao.EmployeeDAO;
 import fu.de200118.pojo.Employee;
+import fu.de200118.pojo.Gender;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("HSF302_Chapter1");
-        try {
-            EntityManager em = emf.createEntityManager();
-            EmployeeDAO empDAO = new EmployeeDAO(emf);
-            testToDo04(empDAO);
+        EmployeeDAO dao = new EmployeeDAO();
+        // ===== CREATE =====
+        // [Lifecycle] emp dang o trang thai NEW/TRANSIENT (moi "new", chua lien quan DB)
+        Employee emp = new Employee("Nguyen Van A", "a@fpt.edu.vn",
+                new BigDecimal("15000000"), Gender.MALE, LocalDate.of(2022, 3, 1));
 
-        } finally {
-            if (emf != null && emf.isOpen()) {
-                emf.close();
-            }
-        }
+        dao.save(emp);
+        // [Lifecycle] sau save(): trong luc persist() emp la MANAGED; sau khi method
+        // save() return (EntityManager da dong), emp tro thanh DETACHED.
+        System.out.println("Da tao: " + emp);
+
+        // ===== READ =====
+        Employee found = dao.findById(emp.getId());
+        // [Lifecycle] found la mot object MANAGED trong pham vi EntityManager cua findById(),
+        // nhung EntityManager cung da dong ngay sau khi return -> found cung la DETACHED
+        // ngay khi ra khoi method.
+        System.out.println("Doc lai: " + found);
+
     }
 
-    public static void testToDo03(EmployeeDAO employeeDAO) {
-        System.out.println("========== TEST TODO 0.3: CREATE ==========");
-        Employee emp = new Employee("Nguyen Van A", "nguyenvana@gmail.com");
-        System.out.println("Trước khi save: ID = " + emp.getId());
 
-        employeeDAO.save(emp);
-
-        System.out.println("Sau khi save: ID = " + emp.getId());
-        System.out.println("Thông tin nhân viên: " + emp);
-    }
-
-    public static void testToDo04(EmployeeDAO employeeDAO) {
-        System.out.println("========== TEST TODO 0.4: READ ==========");
-
-        // 1. Test findById với ID tồn tại (ví dụ ID = 1L)
-        System.out.println("--- 1. findById (tồn tại) ---");
-        Employee found = employeeDAO.findByID(1L);
-        System.out.println("Kết quả tìm ID 1: " + (found != null ? found : "Không tìm thấy"));
-
-        // 2. Test findById với ID không tồn tại
-        System.out.println("\n--- 2. findById (không tồn tại) ---");
-        Employee notFound = employeeDAO.findByID(999999L);
-        System.out.println("Kết quả tìm ID 999999: " + notFound); // Kỳ vọng trả về null
-
-        // 3. Test findAll
-        System.out.println("\n--- 3. findAll ---");
-        List<Employee> list = employeeDAO.findAll();
-        System.out.println("Tổng số nhân viên: " + list.size());
-        for (Employee e : list) {
-            System.out.println(" + " + e);
-        }
-    }
 }

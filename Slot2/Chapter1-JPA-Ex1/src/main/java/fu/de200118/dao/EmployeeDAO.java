@@ -3,57 +3,75 @@ package fu.de200118.dao;
 import fu.de200118.pojo.Employee;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class EmployeeDAO {
-    private final EntityManagerFactory emf;
 
-    public EmployeeDAO(EntityManagerFactory emf) {
-        this.emf = emf;
-    }
+    private static final EntityManagerFactory emf =
+            Persistence.createEntityManagerFactory("hsf301PU");
 
-    public void save(Employee employee) {
+    // ---------- CREATE (TODO 0.3) ----------
+    public void save(Employee e) {
+        // Truoc dong nay: e dang o trang thai NEW/TRANSIENT
         EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = null;
         try {
-            tx = em.getTransaction();
-            tx.begin();
-            em.persist(employee);
-            tx.commit();
-        } catch (Exception ex) {
-            if (tx != null) {
-                tx.rollback();
-            }
-            ex.printStackTrace();
+            em.getTransaction().begin();
+            em.persist(e); // -> e chuyen sang MANAGED, se duoc INSERT khi commit
+            em.getTransaction().commit();
+        } catch (RuntimeException ex) {
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw ex;
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
-            }
+            em.close(); // sau dong nay, e (neu con giu tham chieu) la DETACHED
         }
     }
 
-    public Employee findByID(Long id) {
+    // ---------- READ (TODO 0.4) ----------
+    public Employee findById(Long id) {
         EntityManager em = emf.createEntityManager();
         try {
-            return em.find(Employee.class, id);
+            return em.find(Employee.class, id); // tra ve null neu khong ton tai
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
-            }
+            em.close();
         }
     }
 
     public List<Employee> findAll() {
         EntityManager em = emf.createEntityManager();
         try {
-            String jpql = "select e from Employee e";
-            TypedQuery<Employee> query = em.createQuery(jpql, Employee.class);
-            return query.getResultList();
-        }  finally {
-            if (em != null && em.isOpen()) {
-                em.close();
-            }
+            return em.createQuery("SELECT e FROM Employee e", Employee.class)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // ---------- READ co dieu kien (TODO 0.5) ----------
+    public Employee findByEmail(String email) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            List<Employee> result = em.createQuery(
+                            "SELECT e FROM Employee e WHERE e.email = :email", Employee.class)
+                    .setParameter("email", email)
+                    .getResultList();
+            return result.isEmpty() ? null : result.get(0);
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Employee> findBySalaryGreaterThanAndActive(BigDecimal minSalary) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT e FROM Employee e WHERE e.salary > :minSalary AND e.active = true",
+                            Employee.class)
+                    .setParameter("minSalary", minSalary)
+                    .getResultList();
+        } finally {
+            em.close();
         }
     }
 }
+
