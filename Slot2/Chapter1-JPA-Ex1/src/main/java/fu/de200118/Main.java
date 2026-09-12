@@ -19,7 +19,7 @@ public class Main {
 
         // ===== CREATE =====
         // [Lifecycle] emp dang o trang thai NEW/TRANSIENT (moi "new", chua lien quan DB)
-        Employee emp = new Employee("Nguyen Van A", "b@fpt.edu.vn",
+        Employee emp = new Employee("Nguyen Van A", "c@fpt.edu.vn",
                 new BigDecimal("15000000"), Gender.MALE, LocalDate.of(2022, 3, 1));
 
         dao.save(emp);
@@ -45,6 +45,14 @@ public class Main {
         // Doc lai de kiem chung
         Employee reChecked = dao.findById(emp.getId());
         System.out.println("Kiem tra lai sau update: " + reChecked);
+
+        // ===== DELETE =====
+        dao.delete(emp.getId());
+        // [Lifecycle] ben trong delete(): entity tim duoc chuyen MANAGED -> REMOVED,
+        // bi xoa that su khoi DB khi commit().
+        Employee afterDelete = dao.findById(emp.getId());
+        System.out.println("Sau khi xoa, tim lai: " + afterDelete); // ky vong: null
+
 
 
     }
