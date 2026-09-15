@@ -18,7 +18,8 @@ public class Employee {
     private String email;
     private BigDecimal salary;
     private LocalDate hireDate;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
     private boolean active;
