@@ -57,7 +57,7 @@ public class Department {
     public List<Employee> getEmployees() {
         return employees;
     }
-
+    
     public void addEmployee(Employee employee) {
         this.employees.add(employee);
         employee.setDepartment(this);
