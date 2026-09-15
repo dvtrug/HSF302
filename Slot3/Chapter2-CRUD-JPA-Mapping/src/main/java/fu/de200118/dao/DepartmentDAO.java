@@ -4,6 +4,7 @@ import fu.de200118.pojo.Department;
 import fu.de200118.pojo.Employee;
 import fu.de200118.util.JPAUtil;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 
 import java.util.List;
 
@@ -88,6 +89,35 @@ public class DepartmentDAO {
         } finally {
             em.close();
         }
+    }
+
+    public Department findDepartmentWithEmployees(Long id) {
+        // Tạo EntityManager ngắn hạn cho thao tác đọc
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
+        Department department = null;
+
+        try {
+            // Thực thi JPQL dùng JOIN FETCH theo đúng yêu cầu đề bài
+            department = em.createQuery(
+                            "SELECT d FROM Department d JOIN FETCH d.employees WHERE d.id = :id",
+                            Department.class
+                    )
+                    .setParameter("id", id) // Đặt tham số an toàn tránh SQL Injection
+                    .getSingleResult();      // Lấy ra 1 kết quả duy nhất
+
+        } catch (NoResultException e) {
+            System.out.println("Không tìm thấy Department với ID: " + id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // BẮT BUỘC ĐÓNG EntityManager tại đây để giải phóng kết nối
+            if (em != null) {
+                em.close();
+            }
+        }
+
+        // Trả thực thể về (lúc này EntityManager đã đóng hoàn toàn)
+        return department;
     }
 }
 
