@@ -27,6 +27,13 @@ public class Employee {
     public Employee() {
     }
 
+
+    public Employee(String fullName, String email, Gender gender, BigDecimal salary) {
+        this.email = email;
+        this.fullName = fullName;
+        this.gender = gender;
+        this.salary = salary;
+    }
     public Employee(String email, String fullName, Gender gender, BigDecimal salary, LocalDate hireDate) {
         this.email = email;
         this.fullName = fullName;

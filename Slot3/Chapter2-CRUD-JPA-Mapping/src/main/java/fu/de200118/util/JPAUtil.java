@@ -19,4 +19,7 @@ public class JPAUtil {
             EMF.close();
         }
     }
+
+    public static EntityManagerFactory getEntityManagerFactory() {
+    }
 }
